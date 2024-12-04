@@ -11,14 +11,17 @@ export async function POST(req: Request) {
     ]);
 
     if (!currentUser.orgRole?.includes('org:admin')) {
-      return Response.json(null, { status: 401 });
+      return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const { email, username, password, firstName, lastName, role, position } =
       await req.json();
 
     if (!email || !password || !firstName || !lastName || !role || !position) {
-      return Response.json(null, { status: 400 });
+      return Response.json(
+        { error: 'Missing required fields' },
+        { status: 400 }
+      );
     }
 
     // create user with Clerk
@@ -41,13 +44,35 @@ export async function POST(req: Request) {
       });
 
     if (organization && user) {
-      return Response.json(null, { status: 200 });
+      return Response.json(
+        { message: 'Staff member created successfully' },
+        { status: 200 }
+      );
     }
 
-    return Response.json(null, { status: 500 });
+    return Response.json(
+      { error: 'Failed to create staff member' },
+      { status: 500 }
+    );
   } catch (error: unknown) {
     console.error(error);
 
-    return Response.json(null, { status: 500 });
+    if (error instanceof Error && 'errors' in error) {
+      const clerkError = error as {
+        errors: { code: string; message: string }[];
+      };
+      return Response.json(
+        {
+          error: clerkError.errors[0].message,
+          code: clerkError.errors[0].code,
+        },
+        { status: 422 }
+      );
+    }
+
+    return Response.json(
+      { error: 'An unknown error occurred' },
+      { status: 500 }
+    );
   }
 }

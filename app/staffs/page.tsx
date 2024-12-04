@@ -5,6 +5,7 @@ import { UserCard } from '@/components/user-card';
 import { POSITION, User } from '@/types';
 import { CreateStaffButton } from '@/components/create-staff-button';
 import { ORGANIZATION_ID } from '@/constants';
+import { useEffect } from 'react';
 
 const StaffsPage = async () => {
   await auth.protect();

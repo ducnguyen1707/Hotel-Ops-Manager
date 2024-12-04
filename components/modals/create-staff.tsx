@@ -45,7 +45,7 @@ export const CreateStaffModal = () => {
       !values.role ||
       !values.position
     ) {
-      toast('Please fill in the required fields.');
+      toast.error('Please fill in all required fields.');
       return;
     }
 
@@ -53,16 +53,27 @@ export const CreateStaffModal = () => {
       const res = await axios.post('/api/staffs', values);
 
       if (res.status === 200) {
-        toast('Staff member created successfully.');
+        toast.success('Staff member created successfully.');
+        router.push('/staffs');
+        form.reset();
+        onClose();
       }
     } catch (error) {
-      console.error(error);
-      toast('Something went wrong when creating user.');
-    } finally {
-      form.reset();
-      onClose();
+      if (axios.isAxiosError(error) && error.response) {
+        const errorMessage =
+          error.response.data.error || 'An unknown error occurred';
+        const errorCode = error.response.data.code;
 
-      router.push('/');
+        if (errorCode === 'form_password_pwned') {
+          toast.error(
+            'Password has been found in an online data breach. Please use a different password.'
+          );
+        } else {
+          toast.error(`Error: ${errorMessage}`);
+        }
+      } else {
+        toast.error('An unknown error occurred. Please try again.');
+      }
     }
   }
 

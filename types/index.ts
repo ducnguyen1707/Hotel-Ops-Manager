@@ -88,7 +88,15 @@ export const roomSchema = z.object({
 export const updateStaffSchema = z.object({
   id: z.string(),
   username: z.string().optional(),
-  password: z.string().optional(),
+  password: z
+    .string()
+    .min(9)
+    .max(100)
+    .regex(
+      /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/,
+      'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character'
+    )
+    .optional(),
   firstName: z.string().optional(),
   lastName: z.string().optional(),
   role: z.enum(['org:admin', 'org:member']).optional(),
@@ -99,7 +107,14 @@ export const updateStaffSchema = z.object({
 export const createdStaffSchema = z.object({
   email: z.string().email({ message: 'Invalid email address' }),
   username: z.string().min(3).max(50).optional(),
-  password: z.string().min(8).max(100),
+  password: z
+    .string()
+    .min(9)
+    .max(100)
+    .regex(
+      /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/,
+      'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character'
+    ),
   firstName: z.string().min(2).max(50).optional(),
   lastName: z.string().min(2).max(50).optional(),
   role: z.enum(['org:admin', 'org:member']).optional(),

@@ -13,6 +13,7 @@ model RoomType {
   description String?
   capacity    Int
   price       Float
+  isDelete    Boolean  @default(false)
   rooms       Room[]
   amenities   String[]
   createdAt   DateTime @default(now())
@@ -21,12 +22,13 @@ model RoomType {
 
 model Room {
   id            String        @id @default(cuid())
-  roomNumber    String        @unique
+  roomNumber    String
   type          RoomType      @relation(fields: [roomTypeId], references: [id])
   roomTypeId    String
   status        RoomStatus    @default(READY)
   floor         Int
   imageUrl      String
+  isDelete      Boolean       @default(false)
   transactions  Transaction[]
   dateEffective DateTime      @updatedAt
   createdAt     DateTime      @default(now())

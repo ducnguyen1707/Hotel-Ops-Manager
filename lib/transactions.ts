@@ -64,6 +64,7 @@ export const getAvailableRooms = async (startDate: Date, endDate: Date) => {
   const allRooms = await db.room.findMany({
     where: {
       status: 'READY',
+      isDelete: false,
     },
     include: {
       type: true,

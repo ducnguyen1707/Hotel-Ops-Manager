@@ -25,10 +25,10 @@ import { toast } from 'sonner';
 import { Room, RoomStatus, RoomType } from '@prisma/client';
 import { getAllRoomTypes } from '@/actions/room-types';
 import { RoomSchema, roomSchema } from '@/types';
-import { updateRoom } from '@/actions/room';
+import { deleteRoom, updateRoom } from '@/actions/room';
 import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Trash2Icon } from 'lucide-react';
 import { FileUpload } from './file-upload';
 
 interface EditRoomFormProps {
@@ -56,7 +56,7 @@ export function EditRoomForm({ room }: EditRoomFormProps) {
   async function changeImage(url: string) {
     setIsUploading(true);
     try {
-      await form.setValue('imageUrl', url);
+      form.setValue('imageUrl', url);
       setEditImage(false);
       toast.success('Image updated successfully');
     } catch (error) {
@@ -83,6 +83,7 @@ export function EditRoomForm({ room }: EditRoomFormProps) {
 
       if (!res.success) {
         toast.error(res.message);
+        router.push('/rooms');
         return;
       }
 
@@ -96,10 +97,35 @@ export function EditRoomForm({ room }: EditRoomFormProps) {
     }
   }
 
+  async function onDelete(id: string) {
+    setIsLoading(true);
+    try {
+      const res = await deleteRoom(id);
+
+      if (!res?.success) {
+        toast.error(res?.message || 'Failed to delete room');
+        return;
+      }
+
+      toast.success(res.message);
+      router.push('/rooms');
+    } catch (error) {
+      console.error(error);
+      toast.error('Failed to delete room. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
   return (
     <Card className='w-full max-w-2xl mx-auto'>
       <CardHeader>
-        <CardTitle>Edit Room</CardTitle>
+        <CardTitle className='flex justify-between items-center'>
+          <h1 className='text-3xl'>Edit Rooms</h1>
+          <Button variant='destructive' onClick={() => onDelete(room.id)}>
+            Delete <Trash2Icon className='w-4 h-4 ml-2' />
+          </Button>
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -112,7 +138,7 @@ export function EditRoomForm({ room }: EditRoomFormProps) {
                   <FormItem>
                     <FormLabel>Room Number</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input {...field} type='number' min={1} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -126,11 +152,12 @@ export function EditRoomForm({ room }: EditRoomFormProps) {
                     <FormLabel>Floor</FormLabel>
                     <FormControl>
                       <Input
-                        type='number'
                         {...field}
                         onChange={(e) =>
                           field.onChange(parseInt(e.target.value, 10))
                         }
+                        type='number'
+                        min={1}
                       />
                     </FormControl>
                     <FormMessage />

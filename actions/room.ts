@@ -6,6 +6,31 @@ import { RoomSchema, RoomWithType } from '@/types';
 import { auth } from '@clerk/nextjs/server';
 import { revalidatePath } from 'next/cache';
 
+export const deleteRoom = async (id: string) => {
+  try {
+    const { orgRole } = await auth();
+
+    if (orgRole !== 'org:admin') {
+      return { success: false, message: 'Unauthorized' };
+    }
+
+    await db.room.update({
+      where: {
+        id,
+      },
+      data: {
+        isDelete: true,
+      },
+    });
+
+    redis.flushall();
+
+    return { success: true, message: 'Room deleted' };
+  } catch {
+    return { success: false, message: 'Failed to delete room' };
+  }
+};
+
 export const getAllRooms = async () => {
   const cahcedRooms = await redis.get('rooms');
 
@@ -17,6 +42,9 @@ export const getAllRooms = async () => {
   const rooms = await db.room.findMany({
     include: {
       type: true,
+    },
+    where: {
+      isDelete: false,
     },
   });
 
@@ -50,7 +78,7 @@ export const createRoom = async (data: RoomSchema) => {
       },
     });
 
-    await redis.flushall()
+    await redis.flushall();
 
     revalidatePath('/rooms');
 

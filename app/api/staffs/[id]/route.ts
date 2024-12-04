@@ -39,6 +39,8 @@ export async function DELETE(
       revalidatePath('/staffs');
       return Response.json(null, { status: 200 });
     }
+
+    revalidatePath('/staffs');
   } catch (error) {
     console.error(error);
     return Response.json(null, { status: 500 });
@@ -114,7 +116,7 @@ export async function PUT(req: Request) {
       revalidatePath('/staffs');
       return Response.json(null, { status: 200 });
     }
-    
+
     return Response.json(null, { status: 500 });
   } catch (error) {
     console.error(error);
