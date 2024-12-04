@@ -22,6 +22,7 @@ export const deleteRoom = async (id: string) => {
         isDelete: true,
       },
     });
+    revalidatePath('/rooms');
 
     redis.flushall();
 
