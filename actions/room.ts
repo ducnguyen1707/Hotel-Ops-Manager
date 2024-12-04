@@ -123,7 +123,7 @@ export const updateRoom = async (id: string, data: RoomSchema) => {
     }
 
     await db.room.update({
-      where: { id },
+      where: { id, isDelete: false },
       data: {
         roomNumber: data.roomNumber,
         floor: data.floor,

@@ -12,6 +12,7 @@ export async function getRoomOccupancy() {
           status: 'CHECKIN',
         },
       },
+      isDelete: false,
     },
   });
   const occupancyRate = Math.round((occupiedRooms / totalRooms) * 100);
